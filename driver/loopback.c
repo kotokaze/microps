@@ -10,7 +10,7 @@
 
 #define LOOPBACK_MTU UINT16_MAX
 #define LOOPBACK_QUEUE_LIMIT 16
-#define LOOPBACK_IQR (INTR_IRQ_BASE + 1)
+#define LOOPBACK_IRQ (INTR_IRQ_BASE + 1)
 
 #define PRIV(x) ((struct loopback *)x->priv)
 
@@ -42,7 +42,7 @@ loopback_transmit(struct net_device *dev, uint16_t type, const uint8_t *data, si
   entry = memory_alloc(sizeof(*entry) + len);
   if (!entry) {
     mutex_unlock(&PRIV(dev)->mutex);
-    errorf("out of memory");
+    errorf("memory_alloc() failure");
     return -1;
   }
 
@@ -110,8 +110,7 @@ loopback_init(void)
     errorf("memory_alloc() failure");
     return NULL;
   }
-  lo->irq = LOOPBACK_IQR;
-
+  lo->irq = LOOPBACK_IRQ;
   mutex_init(&lo->mutex);
   queue_init(&lo->queue);
   dev->priv = lo;

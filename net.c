@@ -10,7 +10,7 @@
 
 struct net_protocol {
   struct net_protocol *next;
-  uint8_t type;
+  uint16_t type;
   struct queue_head queue; // input queue
   void (*handler)(const uint8_t *data, size_t len, struct net_device *dev);
 };
@@ -32,12 +32,6 @@ struct net_device *
 net_device_alloc(void)
 {
   struct net_device *dev;
-
-  if (intr_run() == -1)
-  {
-    errorf("intr_run() failure");
-    return NULL;
-  }
 
   dev = memory_alloc(sizeof(*dev));
   if (!dev)
@@ -152,6 +146,7 @@ net_protocol_register(uint16_t type, void (*handler)(const uint8_t *data, size_t
   proto->type = type;
   proto->handler = handler;
   proto->next = protocols;
+  protocols = proto;
   infof("registered, type=0x%04x", type);
   return 0;
 }
