@@ -282,7 +282,7 @@ ip_output_device(struct ip_iface *iface, const uint8_t *data, size_t len, ip_add
 {
   uint8_t hwaddr[NET_DEVICE_ADDR_LEN];
 
-  if (NET_IFACE(iface)->dev->flags & NET_PROTOCOL_TYPE_ARP)
+  if (NET_IFACE(iface)->dev->flags & NET_DEVICE_FLAG_NEED_ARP)
   {
     if (dst == iface->broadcast || dst == IP_ADDR_BROADCAST)
       memcpy(hwaddr, NET_IFACE(iface)->dev->broadcast, NET_IFACE(iface)->dev->alen);
