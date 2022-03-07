@@ -9,6 +9,7 @@
 
 #include "util.h"
 #include "net.h"
+#include "arp.h"
 #include "ip.h"
 
 struct ip_hdr {
@@ -281,6 +282,7 @@ static int
 ip_output_device(struct ip_iface *iface, const uint8_t *data, size_t len, ip_addr_t dst)
 {
   uint8_t hwaddr[NET_DEVICE_ADDR_LEN];
+  int ret;
 
   if (NET_IFACE(iface)->dev->flags & NET_DEVICE_FLAG_NEED_ARP)
   {
@@ -288,8 +290,9 @@ ip_output_device(struct ip_iface *iface, const uint8_t *data, size_t len, ip_add
       memcpy(hwaddr, NET_IFACE(iface)->dev->broadcast, NET_IFACE(iface)->dev->alen);
     else
     {
-      errorf("arp does not implement");
-      return -1;
+      ret = arp_resolve(NET_IFACE(iface), dst, hwaddr);
+      if (ret != ARP_RESOLVE_FOUND)
+        return ret;
     }
   }
 
