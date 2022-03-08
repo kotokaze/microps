@@ -16,7 +16,9 @@
 #define IP_PAYLOAD_SIZE_MAX (IP_TOTAL_SIZE_MAX - IP_HDR_SIZE_MAX)
 
 #define IP_ADDR_LEN 4
-#define IP_ADDR_STR_LEN 16 // "192.000.002.000/n"
+#define IP_ADDR_STR_LEN 16 // "192.000.002.000\0"
+
+#define IP_ENDPOINT_STR_LEN (IP_ADDR_STR_LEN + 6) // "192.000.002.001:12345\0"
 
 // See also: https://www.iana.org/assignments/protocol-numbers/protocol-numbers.txt
 #define IP_PROTOCOL_ICMP 1
@@ -24,6 +26,11 @@
 #define IP_PROTOCOL_UDP 17
 
 typedef uint32_t ip_addr_t;
+
+struct ip_endpoint {
+    ip_addr_t addr;
+    uint16_t port;
+};
 
 struct ip_iface {
   struct net_iface iface;
@@ -41,6 +48,12 @@ ip_addr_pton(const char *p, ip_addr_t *n);
 
 extern char *
 ip_addr_ntop(const ip_addr_t n, char *p, size_t size);
+
+extern int
+ip_endpoint_pton(const char *p, struct ip_endpoint *n);
+
+extern char *
+ip_endpoint_ntop(const struct ip_endpoint *n, char *p, size_t size);
 
 extern int
 ip_route_set_default_gateway(struct ip_iface *iface, const char *gateway);
