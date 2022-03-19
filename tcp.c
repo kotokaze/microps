@@ -545,6 +545,10 @@ tcp_segment_arrives(struct tcp_segment_info *seg, uint8_t flags, uint8_t *data, 
   {
   case TCP_PCB_STATE_SYN_RECEIVED:
   case TCP_PCB_STATE_ESTABLISHED:
+  case TCP_PCB_STATE_FIN_WAIT1:
+  case TCP_PCB_STATE_FIN_WAIT2:
+  case TCP_PCB_STATE_CLOSE_WAIT:
+  case TCP_PCB_STATE_LAST_ACK:
     if (!seg->len)
     {
       if (!pcb->rcv.wnd)
@@ -618,6 +622,9 @@ tcp_segment_arrives(struct tcp_segment_info *seg, uint8_t flags, uint8_t *data, 
     // fall through
 
   case TCP_PCB_STATE_ESTABLISHED:
+  case TCP_PCB_STATE_FIN_WAIT1:
+  case TCP_PCB_STATE_FIN_WAIT2:
+  case TCP_PCB_STATE_CLOSE_WAIT:
     if ((pcb->snd.una < seg->ack) && (seg->ack <= pcb->snd.nxt))
     {
       pcb->snd.una = seg->ack;
@@ -644,7 +651,29 @@ tcp_segment_arrives(struct tcp_segment_info *seg, uint8_t flags, uint8_t *data, 
       tcp_output(pcb, TCP_FLG_ACK, NULL, 0);
       return;
     }
+
+    switch (pcb->state)
+    {
+    case TCP_PCB_STATE_FIN_WAIT1:
+      if (seg->ack == pcb->snd.nxt)
+        pcb->state = TCP_PCB_STATE_FIN_WAIT2;
+      break;
+
+    case TCP_PCB_STATE_FIN_WAIT2:
+      break; // do not delete the PCB
+
+    case TCP_PCB_STATE_CLOSE_WAIT:
+      break; // do nothign
+    }
     break;
+
+  case TCP_PCB_STATE_LAST_ACK:
+    if (seg->ack == pcb->snd.nxt)
+    {
+      pcb->state = TCP_PCB_STATE_CLOSED;
+      tcp_pcb_release(pcb);
+    }
+    return;
   }
 
   /*
@@ -657,6 +686,8 @@ tcp_segment_arrives(struct tcp_segment_info *seg, uint8_t flags, uint8_t *data, 
   switch (pcb->state)
   {
   case TCP_PCB_STATE_ESTABLISHED:
+  case TCP_PCB_STATE_FIN_WAIT1:
+  case TCP_PCB_STATE_FIN_WAIT2:
     if (len)
     {
       memcpy((pcb->buf + (sizeof(pcb->buf) - pcb->rcv.wnd)), data, len);
@@ -666,11 +697,52 @@ tcp_segment_arrives(struct tcp_segment_info *seg, uint8_t flags, uint8_t *data, 
       sched_wakeup(&pcb->ctx);
     }
     break;
+  case TCP_PCB_STATE_CLOSE_WAIT:
+  case TCP_PCB_STATE_LAST_ACK:
+    break; // ignore segment text
   }
 
   /*
    * 8th, check the FIN bit
    */
+  if (TCP_FLG_ISSET(flags, TCP_FLG_FIN))
+  {
+    switch (pcb->state)
+    {
+    case TCP_PCB_STATE_CLOSED:
+    case TCP_PCB_STATE_LISTEN:
+      return; // drop segment
+    }
+
+    pcb->rcv.nxt = (seg->seq + 1);
+    tcp_output(pcb, TCP_FLG_ACK, NULL, 0);
+
+    switch (pcb->state)
+    {
+    case TCP_PCB_STATE_SYN_RECEIVED:
+    case TCP_PCB_STATE_ESTABLISHED:
+      pcb->state = TCP_PCB_STATE_CLOSE_WAIT;
+      sched_wakeup(&pcb->ctx);
+      break;
+
+    case TCP_PCB_STATE_FIN_WAIT1:
+      if (seg->ack == pcb->snd.nxt)
+        pcb->state = TCP_PCB_STATE_TIME_WAIT;
+      else
+        pcb->state = TCP_PCB_STATE_CLOSING;
+      break;
+
+    case TCP_PCB_STATE_FIN_WAIT2:
+      pcb->state = TCP_PCB_STATE_TIME_WAIT;
+      break;
+
+    case TCP_PCB_STATE_CLOSE_WAIT:
+      break; // remain in the CLOSE_WAIT state
+
+    case TCP_PCB_STATE_LAST_ACK:
+      break; // remain in the LAST_ACK state
+    }
+  }
 
   return;
 }
@@ -896,8 +968,33 @@ tcp_close(int id)
     return -1;
   }
 
-  tcp_output(pcb, TCP_FLG_RST, NULL, 0); // temporary close
-  tcp_pcb_release(pcb);
+  switch (pcb->state)
+  {
+  case TCP_PCB_STATE_ESTABLISHED:
+    tcp_output(pcb, (TCP_FLG_ACK | TCP_FLG_FIN), NULL, 0);
+    pcb->snd.nxt++;
+    pcb->state = TCP_PCB_STATE_FIN_WAIT1;
+    break;
+
+  case TCP_PCB_STATE_CLOSE_WAIT:
+    tcp_output(pcb, TCP_FLG_ACK | TCP_FLG_FIN, NULL, 0);
+    pcb->snd.nxt++;
+
+    // RFC793 says "enter CLOSING state", but it seems to be LAST-ACK state
+    pcb->state = TCP_PCB_STATE_LAST_ACK;
+    break;
+
+  default:
+    errorf("unknown state '%u'", pcb->state);
+    mutex_unlock(&mutex);
+    return -1;
+  }
+
+  if (pcb->state == TCP_PCB_STATE_CLOSED)
+    tcp_pcb_release(pcb);
+  else
+    sched_wakeup(&pcb->ctx);
+
   mutex_unlock(&mutex);
   return 0;
 }
