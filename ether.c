@@ -16,9 +16,11 @@ struct ether_hdr {
 };
 
 const uint8_t ETHER_ADDR_ANY[ETHER_ADDR_LEN] = {
-    "\x00\x00\x00\x00\x00\x00"};
+  "\x00\x00\x00\x00\x00\x00"
+};
 const uint8_t ETHER_ADDR_BROADCAST[ETHER_ADDR_LEN] = {
-    "\xff\xff\xff\xff\xff\xff"};
+  "\xff\xff\xff\xff\xff\xff"
+};
 
 int
 ether_addr_pton(const char *p, uint8_t *n)
@@ -110,7 +112,7 @@ ether_input_helper(struct net_device *dev, ether_input_func_t callback)
   hdr = (struct ether_hdr *)frame;
   if (memcmp(dev->addr, hdr->dst, ETHER_ADDR_LEN) != 0)
     if (memcmp(ETHER_ADDR_BROADCAST, hdr->dst, ETHER_ADDR_LEN) != 0)
-      return -1;  // not for me
+      return -1; // not for me
 
   type = ntoh16(hdr->type);
   debugf("dev=%s, type=0x%04x, len=%zd", dev->name, type, flen);

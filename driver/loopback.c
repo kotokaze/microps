@@ -33,14 +33,16 @@ loopback_transmit(struct net_device *dev, uint16_t type, const uint8_t *data, si
   unsigned int num;
 
   mutex_lock(&PRIV(dev)->mutex);
-  if (PRIV(dev)->queue.num >= LOOPBACK_QUEUE_LIMIT) {
+  if (PRIV(dev)->queue.num >= LOOPBACK_QUEUE_LIMIT)
+  {
     mutex_unlock(&PRIV(dev)->mutex);
     errorf("queue is full");
     return -1;
   }
 
   entry = memory_alloc(sizeof(*entry) + len);
-  if (!entry) {
+  if (!entry)
+  {
     mutex_unlock(&PRIV(dev)->mutex);
     errorf("memory_alloc() failure");
     return -1;
@@ -67,7 +69,8 @@ loopback_isr(unsigned int irq, void *id)
 
   dev = (struct net_device *)id;
   mutex_lock(&PRIV(dev)->mutex);
-  while (1) {
+  while (1)
+  {
     entry = queue_pop(&PRIV(dev)->queue);
     if (!entry)
       break;
@@ -82,7 +85,7 @@ loopback_isr(unsigned int irq, void *id)
 }
 
 static struct net_device_ops loopback_ops = {
-    .transmit = loopback_transmit,
+  .transmit = loopback_transmit,
 };
 
 struct net_device *

@@ -37,8 +37,8 @@
 #define TCP_PCB_STATE_CLOSE_WAIT 10
 #define TCP_PCB_STATE_LAST_ACK 11
 
-#define TCP_DEFAULT_RTO 200000     // [us]
-#define TCP_RETRANSMIT_DEADLINE 12 // [s]
+#define TCP_DEFAULT_RTO 200000      // [us]
+#define TCP_RETRANSMIT_DEADLINE 12  // [s]
 
 struct pseudo_hdr {
   uint32_t src;
@@ -89,15 +89,15 @@ struct tcp_pcb {
   uint32_t irs;
   uint16_t mtu;
   uint16_t mss;
-  uint8_t buf[65535]; // receive buffer
+  uint8_t buf[65535];  // receive buffer
   struct sched_ctx ctx;
-  struct queue_head queue; // retransmit queue
+  struct queue_head queue;  // retransmit queue
 };
 
 struct tcp_queue_entry {
-  struct timeval first; // first transmission
-  struct timeval last;  // last transmission
-  unsigned int rto;     // retransmission timeout [us]
+  struct timeval first;  // first transmission
+  struct timeval last;   // last transmission
+  unsigned int rto;      // retransmission timeout [us]
   uint32_t seq;
   uint8_t flg;
   size_t len;
@@ -183,7 +183,7 @@ tcp_pcb_release(struct tcp_pcb *pcb)
   debugf("released, local=%s, foreign=%s",
          ip_endpoint_ntop(&pcb->local, ep1, sizeof(ep1)),
          ip_endpoint_ntop(&pcb->foreign, ep2, sizeof(ep2)));
-  memset(pcb, 0, sizeof(*pcb)); // pcb->state will be TCP_PCB_STATE_FREE;
+  memset(pcb, 0, sizeof(*pcb));  // pcb->state will be TCP_PCB_STATE_FREE;
 }
 
 static struct tcp_pcb *
@@ -206,7 +206,7 @@ tcp_pcb_select(struct ip_endpoint *local, struct ip_endpoint *foreign)
 
         if (pcb->state == TCP_PCB_STATE_LISTEN)
           if ((pcb->foreign.addr == IP_ADDR_ANY) && (pcb->foreign.port == 0))
-            listened = pcb; // listened with wildcard
+            listened = pcb;  // listened with wildcard
       }
     }
   }
@@ -220,7 +220,7 @@ tcp_pcb_get(int id)
   struct tcp_pcb *pcb;
 
   if (id < 0 || id >= (int)countof(pcbs))
-    return NULL; // out of range
+    return NULL;  // out of range
 
   pcb = &pcbs[id];
   if (pcb->state == TCP_PCB_STATE_FREE)
@@ -429,12 +429,12 @@ tcp_segment_arrives(struct tcp_segment_info *seg, uint8_t flags, uint8_t *data, 
 
       pcb->local = *local;
       pcb->foreign = *foreign;
-      pcb->rcv.wnd = sizeof(pcb->buf); // define window size
-      pcb->rcv.nxt = (seg->seq + 1);   // next expected sequence number
-      pcb->irs = seg->seq;             // initial sequence number (remote)
-      pcb->iss = random();             // initial sequence number to send
+      pcb->rcv.wnd = sizeof(pcb->buf);  // define window size
+      pcb->rcv.nxt = (seg->seq + 1);    // next expected sequence number
+      pcb->irs = seg->seq;              // initial sequence number (remote)
+      pcb->iss = random();              // initial sequence number to send
 
-      tcp_output(pcb, (TCP_FLG_SYN | TCP_FLG_ACK), NULL, 0); // send SYN+ACK
+      tcp_output(pcb, (TCP_FLG_SYN | TCP_FLG_ACK), NULL, 0);  // send SYN+ACK
 
       pcb->snd.nxt = (pcb->iss + 1);
       pcb->snd.una = pcb->iss;
@@ -453,7 +453,7 @@ tcp_segment_arrives(struct tcp_segment_info *seg, uint8_t flags, uint8_t *data, 
      * 4th other text or control
      */
 
-    return; // drop segment
+    return;  // drop segment
 
   case TCP_PCB_STATE_SYN_SENT:
     /*
@@ -462,7 +462,7 @@ tcp_segment_arrives(struct tcp_segment_info *seg, uint8_t flags, uint8_t *data, 
     if (TCP_FLG_ISSET(flags, TCP_FLG_ACK))
     {
       if ((seg->ack <= pcb->iss) || (seg->ack > pcb->snd.nxt))
-      { // if the value is not the one we sent
+      {  // if the value is not the one we sent
         tcp_output_segment(seg->ack, 0, TCP_FLG_RST, 0, NULL, 0, local, foreign);
         return;
       }
@@ -484,8 +484,8 @@ tcp_segment_arrives(struct tcp_segment_info *seg, uint8_t flags, uint8_t *data, 
      */
     if (TCP_FLG_ISSET(flags, TCP_FLG_SYN))
     {
-      pcb->rcv.nxt = (seg->seq + 1); // next expected sequence number
-      pcb->irs = seg->seq;           // initial sequence number (remote)
+      pcb->rcv.nxt = (seg->seq + 1);  // next expected sequence number
+      pcb->irs = seg->seq;            // initial sequence number (remote)
 
       if (acceptable)
       {
@@ -499,7 +499,7 @@ tcp_segment_arrives(struct tcp_segment_info *seg, uint8_t flags, uint8_t *data, 
       if (pcb->snd.una > pcb->iss)
       {
         pcb->state = TCP_PCB_STATE_ESTABLISHED;
-        tcp_output(pcb, TCP_FLG_ACK, NULL, 0); // reply with ACK
+        tcp_output(pcb, TCP_FLG_ACK, NULL, 0);  // reply with ACK
 
         /*
          * NOTE:
@@ -532,7 +532,7 @@ tcp_segment_arrives(struct tcp_segment_info *seg, uint8_t flags, uint8_t *data, 
      * 5th, if neither of the SYN or RST bits is set then drop the segment and return
      */
 
-    return; // drop segment
+    return;  // drop segment
 
   default:
     break;
@@ -604,7 +604,7 @@ tcp_segment_arrives(struct tcp_segment_info *seg, uint8_t flags, uint8_t *data, 
    * 5th check the ACK field
    */
   if (!TCP_FLG_ISSET(flags, TCP_FLG_ACK))
-    return; // drop segment
+    return;  // drop segment
 
   switch (pcb->state)
   {
@@ -660,10 +660,10 @@ tcp_segment_arrives(struct tcp_segment_info *seg, uint8_t flags, uint8_t *data, 
       break;
 
     case TCP_PCB_STATE_FIN_WAIT2:
-      break; // do not delete the PCB
+      break;  // do not delete the PCB
 
     case TCP_PCB_STATE_CLOSE_WAIT:
-      break; // do nothign
+      break;  // do nothign
     }
     break;
 
@@ -699,7 +699,7 @@ tcp_segment_arrives(struct tcp_segment_info *seg, uint8_t flags, uint8_t *data, 
     break;
   case TCP_PCB_STATE_CLOSE_WAIT:
   case TCP_PCB_STATE_LAST_ACK:
-    break; // ignore segment text
+    break;  // ignore segment text
   }
 
   /*
@@ -711,7 +711,7 @@ tcp_segment_arrives(struct tcp_segment_info *seg, uint8_t flags, uint8_t *data, 
     {
     case TCP_PCB_STATE_CLOSED:
     case TCP_PCB_STATE_LISTEN:
-      return; // drop segment
+      return;  // drop segment
     }
 
     pcb->rcv.nxt = (seg->seq + 1);
@@ -737,10 +737,10 @@ tcp_segment_arrives(struct tcp_segment_info *seg, uint8_t flags, uint8_t *data, 
       break;
 
     case TCP_PCB_STATE_CLOSE_WAIT:
-      break; // remain in the CLOSE_WAIT state
+      break;  // remain in the CLOSE_WAIT state
 
     case TCP_PCB_STATE_LAST_ACK:
-      break; // remain in the LAST_ACK state
+      break;  // remain in the LAST_ACK state
     }
   }
 
@@ -802,9 +802,9 @@ tcp_input(const uint8_t *data, size_t len, ip_addr_t src, ip_addr_t dst, struct 
   seg.len = (len - hlen);
 
   if (TCP_FLG_ISSET(hdr->flg, TCP_FLG_SYN))
-    seg.len++; // SYN flag consumes one sequence number
+    seg.len++;  // SYN flag consumes one sequence number
   if (TCP_FLG_ISSET(hdr->flg, TCP_FLG_FIN))
-    seg.len++; // FIN flag consumes one sequence number
+    seg.len++;  // FIN flag consumes one sequence number
 
   seg.wnd = ntoh16(hdr->wnd);
   seg.up = ntoh16(hdr->up);
@@ -847,7 +847,7 @@ event_handler(void *arg)
 int
 tcp_init(void)
 {
-  struct timeval interval = { 0, 100000 }; // 100ms
+  struct timeval interval = { 0, 100000 };  // 100ms
 
   if (ip_protocol_register(IP_PROTOCOL_TCP, tcp_input) == -1)
   {
@@ -894,7 +894,7 @@ tcp_open_rfc793(struct ip_endpoint *local, struct ip_endpoint *foreign, int acti
     pcb->local = *local;
     pcb->foreign = *foreign;
     pcb->rcv.wnd = sizeof(pcb->buf);
-    pcb->iss = random(); // initial sequence number to send
+    pcb->iss = random();  // initial sequence number to send
 
     // send SYN
     if (tcp_output(pcb, TCP_FLG_SYN, NULL, 0) == -1)
@@ -907,7 +907,7 @@ tcp_open_rfc793(struct ip_endpoint *local, struct ip_endpoint *foreign, int acti
     }
 
     pcb->snd.una = pcb->iss;
-    pcb->snd.nxt = (pcb->iss + 1); // next sequence number to send
+    pcb->snd.nxt = (pcb->iss + 1);  // next sequence number to send
     pcb->state = TCP_PCB_STATE_SYN_SENT;
   }
   else
@@ -922,7 +922,7 @@ tcp_open_rfc793(struct ip_endpoint *local, struct ip_endpoint *foreign, int acti
 AGAIN:
   state = pcb->state;
   while (pcb->state == state)
-  { // wait for state change
+  {  // wait for state change
     if (sched_sleep(&pcb->ctx, &mutex, NULL) == -1)
     {
       debugf("interrupted");
@@ -940,7 +940,7 @@ AGAIN:
       goto AGAIN;
 
     errorf("open error: %d", pcb->state);
-    pcb->state = TCP_PCB_STATE_CLOSED; // close the connection
+    pcb->state = TCP_PCB_STATE_CLOSED;  // close the connection
     tcp_pcb_release(pcb);
     mutex_unlock(&mutex);
     return -1;

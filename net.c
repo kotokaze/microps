@@ -12,7 +12,7 @@
 struct net_protocol {
   struct net_protocol *next;
   uint16_t type;
-  struct queue_head queue; // input queue
+  struct queue_head queue;  // input queue
   void (*handler)(const uint8_t *data, size_t len, struct net_device *dev);
 };
 
@@ -321,7 +321,7 @@ net_softirq_handler(void)
   struct net_protocol *proto;
   struct net_protocol_queue_entry *entry;
 
-  for (proto=protocols; proto; proto=proto->next)
+  for (proto = protocols; proto; proto = proto->next)
   {
     while (1)
     {

@@ -6,4 +6,4 @@
 extern struct net_device *
 loopback_init(void);
 
-#endif // LOOPBACK_H
+#endif  // LOOPBACK_H

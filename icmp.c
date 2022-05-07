@@ -112,7 +112,7 @@ icmp_input(const uint8_t *data, size_t len, ip_addr_t src, ip_addr_t dst, struct
 
   switch (hdr->type)
   {
-    case ICMP_TYPE_ECHO:
+  case ICMP_TYPE_ECHO:
       // Reply
       icmp_output(ICMP_TYPE_ECHOREPLY, hdr->code, hdr->values, (uint8_t *)(hdr + 1), len - sizeof(*hdr), iface->unicast, src);
       break;

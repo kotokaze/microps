@@ -234,7 +234,7 @@ arp_input(const uint8_t *data, size_t len, struct net_device *dev)
   }
 
   msg = (struct arp_ether_ip *)data;
-  if ((ntoh16(msg->hdr.hrd) != ARP_HRD_ETHER )|| (msg->hdr.hln != ETHER_ADDR_LEN))
+  if ((ntoh16(msg->hdr.hrd) != ARP_HRD_ETHER) || (msg->hdr.hln != ETHER_ADDR_LEN))
   {
     errorf("unsupported hardware address");
     return;
@@ -253,7 +253,7 @@ arp_input(const uint8_t *data, size_t len, struct net_device *dev)
 
   mutex_lock(&mutex);
   if (arp_cache_update(spa, msg->sha))
-    merge = 1;  // updated
+    merge = 1; // updated
   mutex_unlock(&mutex);
 
   iface = net_device_get_iface(dev, NET_IFACE_FAMILY_IP);
@@ -315,7 +315,7 @@ arp_resolve(struct net_iface *iface, ip_addr_t pa, uint8_t *ha)
   if (cache->state == ARP_CACHE_STATE_INCOMPLETE)
   {
     mutex_unlock(&mutex);
-    arp_request(iface, pa);  // retry
+    arp_request(iface, pa); // retry
     return ARP_RESOLVE_INCOMPLETE;
   }
 
@@ -350,7 +350,7 @@ arp_timer_handler(void)
 int
 arp_init(void)
 {
-  struct timeval interval = {1, 0};  // 1 sec
+  struct timeval interval = { 1, 0 }; // 1 sec
 
   if (net_protocol_register(ETHER_TYPE_ARP, arp_input) == -1)
   {

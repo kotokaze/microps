@@ -90,7 +90,8 @@ cleanup(void)
   net_shutdown();
 }
 
-int main(int argc, char *argv[])
+int
+main(int argc, char *argv[])
 {
   ip_addr_t src, dst;
   uint16_t id, seq = 0;

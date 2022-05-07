@@ -21,7 +21,8 @@
 
 #define CLONE_DEVICE "/dev/net/tun"
 
-int main(int argc, char *argv[])
+int
+main(int argc, char *argv[])
 {
   int fd;
   struct ifreq ifr = {};

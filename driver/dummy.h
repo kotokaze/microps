@@ -6,4 +6,4 @@
 extern struct net_device *
 dummy_init(void);
 
-#endif // DUMMY_H
+#endif  // DUMMY_H

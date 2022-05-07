@@ -24,7 +24,7 @@ on_signal(int s)
 {
   (void)s;
   terminate = 1;
-  close(0); // close stdin to avoid reading from stdin
+  close(0);  // close stdin to avoid reading from stdin
 }
 
 static int

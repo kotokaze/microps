@@ -10,8 +10,7 @@
 #include "util.h"
 #include "net.h"
 
-struct irq_entry
-{
+struct irq_entry {
   struct irq_entry *next;
   unsigned int irq;
   int (*handler)(unsigned int irq, void *dev);
@@ -94,8 +93,8 @@ intr_timer_setup(struct itimerspec *interval)
 static void *
 intr_thread(void *arg)
 {
-  const struct timespec ts = {0, 1000000}; // 1ms
-  struct itimerspec interval = {ts, ts};
+  const struct timespec ts = { 0, 1000000 };  // 1ms
+  struct itimerspec interval = { ts, ts };
   int terminate = 0, sig, err;
   struct irq_entry *entry;
 
@@ -145,7 +144,8 @@ intr_thread(void *arg)
   return NULL;
 }
 
-int intr_run(void)
+int
+intr_run(void)
 {
   int err;
 
@@ -165,7 +165,8 @@ int intr_run(void)
   return 0;
 }
 
-void intr_shutdown(void)
+void
+intr_shutdown(void)
 {
   if (pthread_equal(tid, pthread_self()) != 0)
   {
@@ -176,7 +177,8 @@ void intr_shutdown(void)
   pthread_join(tid, NULL);
 }
 
-int intr_init(void)
+int
+intr_init(void)
 {
   tid = pthread_self();
   pthread_barrier_init(&barrier, NULL, 2);

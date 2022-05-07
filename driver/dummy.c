@@ -28,7 +28,7 @@ dummy_isr(unsigned int irq, void *id)
 }
 
 static struct net_device_ops dummy_ops = {
-    .transmit = dummy_transmit,
+  .transmit = dummy_transmit,
 };
 
 struct net_device *

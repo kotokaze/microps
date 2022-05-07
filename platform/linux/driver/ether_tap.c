@@ -92,7 +92,6 @@ ether_tap_open(struct net_device *dev)
     return -1;
   }
 
-
   // Enable async I/O
   if (fcntl(tap->fd, F_SETFL, O_ASYNC) == -1)
   {
@@ -190,9 +189,9 @@ ether_tap_isr(unsigned int irq, void *id)
 }
 
 static struct net_device_ops ether_tap_ops = {
-    .open = ether_tap_open,
-    .close = ether_tap_close,
-    .transmit = ether_tap_transmit,
+  .open = ether_tap_open,
+  .close = ether_tap_close,
+  .transmit = ether_tap_transmit,
 };
 
 struct net_device *

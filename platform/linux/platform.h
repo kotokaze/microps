@@ -13,13 +13,13 @@
 static inline void *
 memory_alloc(size_t size)
 {
-    return calloc(1, size);
+  return calloc(1, size);
 }
 
 static inline void
 memory_free(void *ptr)
 {
-    free(ptr);
+  free(ptr);
 }
 
 /*
@@ -33,19 +33,19 @@ typedef pthread_mutex_t mutex_t;
 static inline int
 mutex_init(mutex_t *mutex)
 {
-    return pthread_mutex_init(mutex, NULL);
+  return pthread_mutex_init(mutex, NULL);
 }
 
 static inline int
 mutex_lock(mutex_t *mutex)
 {
-    return pthread_mutex_lock(mutex);
+  return pthread_mutex_lock(mutex);
 }
 
 static inline int
 mutex_unlock(mutex_t *mutex)
 {
-    return pthread_mutex_unlock(mutex);
+  return pthread_mutex_unlock(mutex);
 }
 
 /*
@@ -56,7 +56,7 @@ mutex_unlock(mutex_t *mutex)
 #define INTR_IRQ_SOFTIRQ SIGUSR1
 #define INTR_IRQ_EVENT SIGUSR2
 
-#define INTR_IRQ_SHARED  0x0001
+#define INTR_IRQ_SHARED 0x0001
 
 extern int
 intr_request_irq(unsigned int irq, int (*handler)(unsigned int irq, void *id), int flags, const char *name, void *dev);
@@ -78,15 +78,15 @@ intr_init(void);
  */
 
 struct sched_ctx {
-    pthread_cond_t cond;
-    int interrupted;
-    int wc; // wait count
+  pthread_cond_t cond;
+  int interrupted;
+  int wc;  // wait count
 };
 
-#define SCHED_CTX_INITIALIZER          \
-    {                                  \
-        PTHREAD_COND_INITIALIZER, 0, 0 \
-    }
+#define SCHED_CTX_INITIALIZER      \
+  {                                \
+    PTHREAD_COND_INITIALIZER, 0, 0 \
+  }
 
 extern int
 sched_ctx_init(struct sched_ctx *ctx);

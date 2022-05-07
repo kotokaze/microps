@@ -23,32 +23,32 @@
 #define UDP_SOURCE_PORT_MAX 65535
 
 struct pseudo_hdr {
-    uint32_t src;
-    uint32_t dst;
-    uint8_t zero;
-    uint8_t protocol;
-    uint16_t len;
+  uint32_t src;
+  uint32_t dst;
+  uint8_t zero;
+  uint8_t protocol;
+  uint16_t len;
 };
 
 struct udp_hdr {
-    uint16_t src;
-    uint16_t dst;
-    uint16_t len;
-    uint16_t sum;
+  uint16_t src;
+  uint16_t dst;
+  uint16_t len;
+  uint16_t sum;
 };
 
 struct udp_pcb {
-    uint8_t state;
-    struct ip_endpoint local;
-    struct queue_head queue; // queue for incoming packets
-    int wc; // wait count
-    struct sched_ctx ctx;
+  uint8_t state;
+  struct ip_endpoint local;
+  struct queue_head queue;  // queue for incoming packets
+  int wc;                   // wait count
+  struct sched_ctx ctx;
 };
 
 struct udp_queue_entry {
-    struct ip_endpoint remote;
-    uint16_t len;
-    uint8_t data[];
+  struct ip_endpoint remote;
+  uint16_t len;
+  uint8_t data[];
 };
 
 static mutex_t mutex = MUTEX_INITIALIZER;
@@ -142,11 +142,11 @@ udp_pcb_get(int id)
   struct udp_pcb *pcb;
 
   if ((id < 0) || (id >= (int)countof(pcbs)))
-    return NULL; // out of range
+    return NULL;  // out of range
 
   pcb = &pcbs[id];
   if (pcb->state != UDP_PCB_STATE_OPEN)
-    return NULL; // invalid state
+    return NULL;  // invalid state
 
   return pcb;
 }

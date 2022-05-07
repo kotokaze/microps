@@ -67,7 +67,7 @@ ip_addr_pton(const char *p, ip_addr_t *n)
       return -1;
     if (ep == sp)
       return -1;
-    if(idx == 3 && *ep != '\0')
+    if (idx == 3 && *ep != '\0')
       return -1;
     if (idx != 3 && *ep != '.')
       return -1;
@@ -166,7 +166,7 @@ ip_route_add(ip_addr_t network, ip_addr_t netmask, ip_addr_t nexthop, struct ip_
   char addr3[IP_ADDR_STR_LEN];
   char addr4[IP_ADDR_STR_LEN];
 
-  route = memory_alloc(sizeof(* route));
+  route = memory_alloc(sizeof(*route));
   if (!route)
   {
     errorf("memory_alloc() failure");
@@ -290,8 +290,7 @@ ip_iface_register(struct net_device *dev, struct ip_iface *iface)
   infof("registered: dev=%s, unicast=%s, netmask=%s, broadcast=%s", dev->name,
         ip_addr_ntop(iface->unicast, addr1, sizeof(addr1)),
         ip_addr_ntop(iface->netmask, addr2, sizeof(addr2)),
-        ip_addr_ntop(iface->broadcast, addr3, sizeof(addr3))
-      );
+        ip_addr_ntop(iface->broadcast, addr3, sizeof(addr3)));
   return 0;
 }
 
@@ -449,7 +448,7 @@ ip_output_core(struct ip_iface *iface, uint8_t protocol, const uint8_t *data, si
   hdr->sum = 0;
   hdr->src = src;
   hdr->dst = dst;
-  hdr->sum = cksum16((uint16_t *)hdr, hlen, 0); // don't convert byteoder
+  hdr->sum = cksum16((uint16_t *)hdr, hlen, 0);  // don't convert byteoder
 
   memcpy(hdr + 1, data, len);
   debugf("dev=%s, dst=%s, protocol=%u, len=%u",

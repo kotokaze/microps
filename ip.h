@@ -16,9 +16,9 @@
 #define IP_PAYLOAD_SIZE_MAX (IP_TOTAL_SIZE_MAX - IP_HDR_SIZE_MAX)
 
 #define IP_ADDR_LEN 4
-#define IP_ADDR_STR_LEN 16 // "192.000.002.000\0"
+#define IP_ADDR_STR_LEN 16  // "192.000.002.000\0"
 
-#define IP_ENDPOINT_STR_LEN (IP_ADDR_STR_LEN + 6) // "192.000.002.001:12345\0"
+#define IP_ENDPOINT_STR_LEN (IP_ADDR_STR_LEN + 6)  // "192.000.002.001:12345\0"
 
 // See also: https://www.iana.org/assignments/protocol-numbers/protocol-numbers.txt
 #define IP_PROTOCOL_ICMP 1
@@ -28,8 +28,8 @@
 typedef uint32_t ip_addr_t;
 
 struct ip_endpoint {
-    ip_addr_t addr;
-    uint16_t port;
+  ip_addr_t addr;
+  uint16_t port;
 };
 
 struct ip_iface {
@@ -79,4 +79,4 @@ ip_protocol_register(uint8_t type, void (*handler)(const uint8_t *data, size_t l
 extern int
 ip_init(void);
 
-#endif // IP_H
+#endif  // IP_H

@@ -100,7 +100,7 @@ setup(void)
 static void
 cleanup(void)
 {
-  sleep(1); // wait for a while to close all connections
+  sleep(1);  // wait for a while to close all connections
   net_shutdown();
 }
 
